@@ -1,5 +1,5 @@
 language: cpp
-dist: precise
+dist: trusty
 env:
 matrix:
   # exit if one fails
@@ -104,6 +104,8 @@ install:
     # create enviroment
     - conda env create -f deeds-dev-requirements.yml
 
+
+script:
     # activate
     - source activate deeds-dev-requirements
 
