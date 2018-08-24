@@ -1,0 +1,24 @@
+clone_folder: c:\projects\deedsBCV
+
+environment:
+  ENV_NAME: deeds-dev-requirements
+  # set miniconda version explicitly
+  MINICONDA: C:\Miniconda36-x64
+
+
+install:
+  - set DEV_PREFIX=%MINICONDA%/envs/%ENV_NAME%
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda env create -f deeds-dev-requirements.yml
+  - activate %ENV_NAME%
+
+build_script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - cmake --build . --target ALL_BUILD --config Release
+
+# on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
