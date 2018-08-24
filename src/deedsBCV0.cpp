@@ -48,6 +48,7 @@ struct parameters{
 #include "MINDSSCbox.h"
 #include "dataCostD.h"
 #include "parseArguments.h"
+#include "deeds_config.h"
 
 
 int main (int argc, char * const argv[]) {
@@ -56,6 +57,7 @@ int main (int argc, char * const argv[]) {
     
     if(argc<4||argv[1][1]=='h'){
         cout<<"=============================================================\n";
+        cout<<"deedsBCV0 v" << DEEDS_VERSION_MAJOR << "." << DEEDS_VERSION_MINOR << "." << DEEDS_VERSION_PATCH << "\n";
         cout<<"Usage (required input arguments):\n";
         cout<<"./deedsBCV -F fixed.nii.gz -M moving.nii.gz -O output\n";
         cout<<"optional parameters:\n";
