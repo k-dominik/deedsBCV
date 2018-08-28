@@ -1,3 +1,5 @@
+#include <chrono>
+
 /* Incremental diffusion regularisation of parametrised transformation
  using (globally optimal) belief-propagation on minimum spanning tree.
  Fast distance transform uses squared differences.
@@ -124,7 +126,7 @@ void regularisationCL(float* costall,float* u0,float* v0,float* w0,float* u1,flo
 	int n=n2/step1;
 	int o=o2/step1;
 	
-	timeval time1,time2;
+	std::chrono::time_point<chrono::high_resolution_clock> time1,time2;
 	
 	int sz=m*n*o;
     int len=hw*2+1;
@@ -132,9 +134,6 @@ void regularisationCL(float* costall,float* u0,float* v0,float* w0,float* u1,flo
 	int len2=len*len*len;
     int len3=len*len*len;
 
-    gettimeofday(&time1, NULL);
-
-	
 	short *allinds=new short[sz*len2];
 	float *cost1=new float[len2];
 	float *vals=new float[len2];
@@ -184,15 +183,14 @@ void regularisationCL(float* costall,float* u0,float* v0,float* w0,float* u1,flo
         processed[i]=false;
     }
     int dblcount=0;
-    float timeCopy=0;
-    float timeMessage=0;
-	//calculate mst-cost
+    std::chrono::duration<double> timeCopy, timeMessage;
+    //calculate mst-cost
     for(int lev=maxlev-1;lev>0;lev--){
         int start=startlev[lev-1];
         int length=numlev[lev];
 
         
-        gettimeofday(&time1, NULL);
+        time1 = std::chrono::high_resolution_clock::now();
 
         for(int i=start;i<start+length;i++){
             int ochild=ordered[i];
@@ -212,10 +210,10 @@ void regularisationCL(float* costall,float* u0,float* v0,float* w0,float* u1,flo
         }
 
 
-        gettimeofday(&time2, NULL);
-        timeMessage+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time2 = std::chrono::high_resolution_clock::now();
+        timeMessage = time2 - time1;
 
-        gettimeofday(&time1, NULL);
+        time1 = std::chrono::high_resolution_clock::now();
 
         //copy necessary if vectorisation is used (otherwise multiple simultaneous +='s)
         int start0=startlev[lev-1];
@@ -231,8 +229,8 @@ void regularisationCL(float* costall,float* u0,float* v0,float* w0,float* u1,flo
             }
         }
         
-        gettimeofday(&time2, NULL);
-        timeCopy+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time2 = std::chrono::high_resolution_clock::now();
+        timeCopy = time2 - time1;
 
         
     }

@@ -1,3 +1,5 @@
+#include <chrono>
+
 
 void boxfilter(float* input,float* temp1,float* temp2,int hw,int m,int n,int o){
     
@@ -125,7 +127,7 @@ void distances(float* im1,float* d1,int m,int n,int o,int qs,int l){
 
 //__builtin_popcountll(left[i]^right[i]); absolute hamming distances
 void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
-	timeval time1,time2;
+	std::chrono::time_point<chrono::high_resolution_clock> time1, time2;
     
     //MIND with self-similarity context
 	
@@ -154,16 +156,16 @@ void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
     
     //============== DISTANCES USING BOXFILTER ===================
 	float* d1=new float[sz1*len1];
-    gettimeofday(&time1, NULL);
+    time1 = std::chrono::high_resolution_clock::now();
 
 #pragma omp parallel for
     for(int l=0;l<len1;l++){
         distances(im1,d1,m,n,o,qs,l);
     }
 
-    gettimeofday(&time2, NULL);
-    float timeMIND1=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-    gettimeofday(&time1, NULL);
+    time2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> timeMIND1 = time2 - time1;
+    time1 = std::chrono::high_resolution_clock::now();
 
     //quantisation table
     const int val=6;
@@ -224,8 +226,8 @@ void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
     }
     
 
-    gettimeofday(&time2, NULL);
-    float timeMIND2=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+    time2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> timeMIND2 = time2 - time1;
     delete d1;
     
 

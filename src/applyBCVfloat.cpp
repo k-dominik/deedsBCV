@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <sys/time.h>
 #include <vector>
 #include <algorithm>
 #include <numeric>

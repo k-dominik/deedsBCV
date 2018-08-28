@@ -4,6 +4,8 @@
  Edge-weights 
 */
 
+#include <chrono>
+
 class Edge
 {
 public:
@@ -58,7 +60,7 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
 	
 	int num_vertices=m*n*o; int sz=num_vertices;
 	int len=m*n*o;
-	timeval time1,time2;
+	std::chrono::time_point<chrono::high_resolution_clock> time1, time2;
 	int num_neighbours=6;
 	float* edgecost=new float[num_vertices*num_neighbours]; 
 	int* index_neighbours=new int[num_vertices*num_neighbours];
@@ -136,7 +138,7 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
 	Edge edgeout=Edge(0.0,-1,-1);
 	Edge minedge=Edge(0.0,-1,-1);
 	float cost=0.0;
-	gettimeofday(&time1, NULL);
+	time1 = std::chrono::high_resolution_clock::now();
 	
 	for(int i=0;i<num_vertices-1;i++){ //run n-1 times to have all vertices added
 		//add edges of new vertex to priority queue
@@ -190,11 +192,11 @@ void primsGraph(float* im1,int* ordered,int* parents,float* edgemst,int step1,in
 	}
 
     
-	gettimeofday(&time2, NULL);
-	double timeAll=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+	time2 = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double> timeAll = time2 - time1;
     nth_element(levelcount,levelcount+maxlevel/2,levelcount+maxlevel);
 	//printf("Prims algorithm with %d levels finished in %f secs.\nMaximum %d, minimum %d, mean %d, and median %d width of tree.\n",
-          // maxlevel,timeAll,*max_element(levelcount,levelcount+maxlevel),*min_element(levelcount,levelcount+maxlevel),(int)(num_vertices/maxlevel),levelcount[maxlevel/2]);
+          // maxlevel,timeAll.count(),*max_element(levelcount,levelcount+maxlevel),*min_element(levelcount,levelcount+maxlevel),(int)(num_vertices/maxlevel),levelcount[maxlevel/2]);
 	for(int i=0;i<sz;i++){
         edgemst[i]=0.0f;
     }
