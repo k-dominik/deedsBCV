@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <sys/time.h>
+#include <chrono>
 #include <vector>
 #include <algorithm>
 #include <map>
@@ -124,7 +124,7 @@ int main (int argc, char * const argv[]) {
 	float alpha=1;
     //READ IMAGES and INITIALISE ARRAYS
     
-    timeval time1,time2,time1a,time2a;
+    chrono::time_point<chrono::high_resolution_clock> time1, time2, time1a, time2a;
     
     RAND_SAMPLES=1; //fixed/efficient random sampling strategy
     
@@ -175,8 +175,8 @@ int main (int argc, char * const argv[]) {
     uint64_t* im1b_mind=new uint64_t[m*n*o];
     uint64_t* warped_mind=new uint64_t[m*n*o];
 	
-	gettimeofday(&time1a, NULL);
-    float timeDataSmooth=0;
+	time1a = chrono::high_resolution_clock::now();
+    chrono::duration<double> timeDataSmooth;
 	//==========================================================================================
 	//==========================================================================================
 	float* bench=new float[6*args.levels];
@@ -195,14 +195,14 @@ int main (int argc, char * const argv[]) {
         float prev=mind_step[max(level-1,0)];
         float curr=mind_step[level];
         
-        float timeMIND=0; float timeSmooth=0; float timeData=0; float timeTrans=0;
+        chrono::duration<double> timeMIND, timeSmooth, timeData, timeTrans;
 		
         if(level==0|prev!=curr){
-            gettimeofday(&time1, NULL);
+            time1 = chrono::high_resolution_clock::now();
             descriptor(im1_mind,im1,m,n,o,mind_step[level]);//max(min(quant1,2.0f),1.0f)
             descriptor(im1b_mind,im1b,m,n,o,mind_step[level]);
-            gettimeofday(&time2, NULL);
-            timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+            time2 = chrono::high_resolution_clock::now();
+            timeMIND += time2 - time1;
 		}
 		
 		int len3=pow(hw1*2+1,3);
@@ -215,64 +215,59 @@ int main (int argc, char * const argv[]) {
 		//cout<<"==========================================================\n";
 		
         //FULL-REGISTRATION FORWARDS
-        gettimeofday(&time1, NULL);
-        gettimeofday(&time2, NULL);
-		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time1 = chrono::high_resolution_clock::now();
+        time2 = chrono::high_resolution_clock::now();
+		timeTrans = time2 - time1;
         cout<<"T"<<flush;
-        gettimeofday(&time1, NULL);
+        time1 = chrono::high_resolution_clock::now();
 		descriptor(warped_mind,warped1,m,n,o,mind_step[level]);
 
-        gettimeofday(&time2, NULL);
-		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time2 = chrono::high_resolution_clock::now();
+    	timeMIND += time2 - time1;
         cout<<"M"<<flush;
-        gettimeofday(&time1, NULL);
+        time1 = chrono::high_resolution_clock::now();
         dataCostCL((unsigned long*)im1b_mind,(unsigned long*)warped_mind,costall,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
-        gettimeofday(&time2, NULL);
+        time2 = chrono::high_resolution_clock::now();
 
-		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+		timeData += time2 - time1;
         cout<<"D"<<flush;
-        gettimeofday(&time1, NULL);
-        gettimeofday(&time2, NULL);
-		timeSmooth+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time1 = chrono::high_resolution_clock::now();
+        time2 = chrono::high_resolution_clock::now();
+		timeSmooth += time2 - time1;
         cout<<"S"<<flush;
 		
         //FULL-REGISTRATION BACKWARDS
-        gettimeofday(&time1, NULL);
-		gettimeofday(&time2, NULL);
-		timeTrans+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time1 = chrono::high_resolution_clock::now();
+		time2 = chrono::high_resolution_clock::now();
+		timeTrans += time2 - time1;
         cout<<"T"<<flush;
-        gettimeofday(&time1, NULL);
+        time1 = chrono::high_resolution_clock::now();
 		descriptor(warped_mind,warped2,m,n,o,mind_step[level]);
 
-        gettimeofday(&time2, NULL);
-		timeMIND+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time2 = chrono::high_resolution_clock::now();
+		timeMIND += time2 - time1;
         cout<<"M"<<flush;
-        gettimeofday(&time1, NULL);
+        time1 = chrono::high_resolution_clock::now();
         dataCostCL((unsigned long*)im1_mind,(unsigned long*)warped_mind,costall2,m,n,o,len3,step1,hw1,quant1,alpha,RAND_SAMPLES);
-        gettimeofday(&time2, NULL);
-		timeData+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time2 = chrono::high_resolution_clock::now();
+		timeData += time2 - time1;
         cout<<"DS\n"<<flush;
-        gettimeofday(&time1, NULL);
+        time1 = chrono::high_resolution_clock::now();
         estimateAffine2(X,Xprev,im1b,im1,costall,costall2,step1,quant1,hw1);
 
-        gettimeofday(&time2, NULL);
-		timeSmooth+=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
+        time2 = chrono::high_resolution_clock::now();
+		timeSmooth += time2 - time1;
         //cout<<"S"<<flush;
 		
-        printf("t: MIND=%2.2f, data=%2.2f, affine=%2.2f, speed=%2.2e dof/s\n",timeMIND,timeData,timeSmooth,2.0*(float)sz1*(float)len3/(timeData+timeSmooth));
-        
-        gettimeofday(&time1, NULL);
+        printf("t: MIND=%2.2f, data=%2.2f, affine=%2.2f, speed=%2.2e dof/s\n",
+               timeMIND.count(), timeData.count(), timeSmooth.count() ,2.0*(float)sz1*(float)len3/(timeData.count() + timeSmooth.count()));
 
-        gettimeofday(&time2, NULL);
-        float timeMapping=time2.tv_sec+time2.tv_usec/1e6-(time1.tv_sec+time1.tv_usec/1e6);
-		
-        
         for(int i=0;i<16;i++){
             Xprev[i]=X[i];
         }
 
         
-        timeDataSmooth+=(timeSmooth+timeData+timeMIND+timeTrans);
+        timeDataSmooth += (timeSmooth + timeData + timeMIND + timeTrans);
         
         delete costall; delete costall2;
 		
@@ -282,8 +277,8 @@ int main (int argc, char * const argv[]) {
 	//==========================================================================================
 	//==========================================================================================
 	
-    gettimeofday(&time2a, NULL);
-	float timeALL=time2a.tv_sec+time2a.tv_usec/1e6-(time1a.tv_sec+time1a.tv_usec/1e6);
+    time2a = chrono::high_resolution_clock::now();
+	chrono::duration<double> timeALL = time2a - time1a;
     
     
     string outputfile;
@@ -324,7 +319,7 @@ int main (int argc, char * const argv[]) {
     }
   
     
-	cout<<"Finished. Total time: "<<timeALL<<" sec. ("<<timeDataSmooth<<" sec. for MIND+data+affine+trans)\n";
+	cout<<"Finished. Total time: "<< timeALL.count() <<" sec. ("<< timeDataSmooth.count() <<" sec. for MIND+data+affine+trans)\n";
 	
 	
 	return 0;
