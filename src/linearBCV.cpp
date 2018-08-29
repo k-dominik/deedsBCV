@@ -9,8 +9,6 @@
 #include <functional>
 #include <string.h>
 #include <sstream>
-#include <pthread.h>
-#include <thread>
 #include "zlib.h"
 #include <sys/stat.h>
 

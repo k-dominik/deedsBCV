@@ -10,8 +10,6 @@
 #include <string.h>
 #include <sstream>
 #include <x86intrin.h>
-#include <pthread.h>
-#include <thread>
 #include <cstddef>   
 #include "zlib.h"
 #include <sys/stat.h>

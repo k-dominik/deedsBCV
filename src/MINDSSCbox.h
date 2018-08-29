@@ -151,9 +151,6 @@ void descriptor(uint64_t* mindq,float* im1,int m,int n,int o,int qs){
 	int d=12;
     int sz1=m*n*o;
 
-    pthread_t thread1, thread2, thread3;
-
-    
     //============== DISTANCES USING BOXFILTER ===================
 	float* d1=new float[sz1*len1];
     time1 = std::chrono::high_resolution_clock::now();
